@@ -9,7 +9,9 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
+import com.revrobotics.CANSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.*;
+
 
 /**
  * This is a demo program showing the use of the DifferentialDrive class. Runs the motors with
@@ -42,17 +44,19 @@ public class Robot extends TimedRobot {
       }*/
 
       for(int i = 0; i < 3; i++){
+        elapsedTime.reset();
 
-      elapsedTime.reset();
+        while(elapsedTime.get() < 1){
+          SmartDashboard.putString("DB/String 0", String.format("%.2f", elapsedTime.get()));
+          m_robotDrive.arcadeDrive(0.5, 0.5);
+        }
 
-      while(elapsedTime.get() < 1){
-      m_robotDrive.arcadeDrive(0.5, 0.5);
+        while(elapsedTime.get() < 2){
+          SmartDashboard.putString("DB/String 0", String.format("%.2f", elapsedTime.get()));
+          m_robotDrive.arcadeDrive(0.5, -0.5);
+        }
       }
-
-      while(elapsedTime.get() < 2){
-        m_robotDrive.arcadeDrive(0.5, -0.5);
-      }
-    }
+      m_robotDrive.arcadeDrive(0, 0);
 
 
 
