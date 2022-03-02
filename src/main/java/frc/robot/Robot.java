@@ -36,11 +36,27 @@ public class Robot extends TimedRobot {
   public void autonomousInit(){
       elapsedTime.reset();
       elapsedTime.start();
-      while(elapsedTime.get() < 1){
+      /*while(elapsedTime.get() < 1){
         SmartDashboard.putString("DB/String 0", String.format("%.2f", elapsedTime.get()));
         m_robotDrive.arcadeDrive(0.5, 0);
+      }*/
+
+      for(int i = 0; i < 3; i++){
+
+      elapsedTime.reset();
+
+      while(elapsedTime.get() < 1){
+      m_robotDrive.arcadeDrive(0.5, 0.5);
       }
-      m_robotDrive.arcadeDrive(0, 0);
+
+      while(elapsedTime.get() < 2){
+        m_robotDrive.arcadeDrive(0.5, -0.5);
+      }
+    }
+
+
+
+      
   }
 
   @Override
