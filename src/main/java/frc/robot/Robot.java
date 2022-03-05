@@ -115,4 +115,14 @@ public class Robot extends TimedRobot{
     m_robotDrive.arcadeDrive(-m_stick.getY(), -m_stick.getX());
     
   }
+
+  @Override
+public void autonomousPeriodic() {
+    double centerX;
+    synchronized (imgLock) {
+        centerX = this.centerX;
+    }
+    double turn = centerX - (IMG_WIDTH / 2);
+    drive.arcadeDrive(-0.6, turn * 0.005);
+}
 }
