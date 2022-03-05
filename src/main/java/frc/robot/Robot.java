@@ -67,10 +67,11 @@ public class Robot extends TimedRobot{
     camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
 
     visionThread = new VisionThread(camera, new MyVisionPipeline(), pipeline -> {
-      if (!pipeline.findBlobsOutput().isEmpty()) {
-          Rect r = Imgproc.boundingRect(pipeline.findBlobsOutput().get(0));
+      if (!pipeline.findBlobsOutput().toList().isEmpty()) {
+        
+          Point r = pipeline.findBlobsOutput().toList().get(0).pt;
           synchronized (imgLock) {
-              centerX = r.x + (r.width / 2);
+              centerX = r.x;
           }
       }
   });
