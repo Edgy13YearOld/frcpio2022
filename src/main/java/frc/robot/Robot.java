@@ -16,10 +16,15 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.CvSink;
 import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.wpilibj.TimedRobot;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+
+import edu.wpi.first.vision.VisionPipeline;
+import edu.wpi.first.vision.VisionRunner;
+import edu.wpi.first.vision.VisionThread;
+import org.opencv.core.Rect;
 import org.opencv.imgproc.Imgproc;
 
 
@@ -28,10 +33,21 @@ import org.opencv.imgproc.Imgproc;
  * arcade steering.
  */
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot{
   private final PWMSparkMax m_leftMotor0 = new PWMSparkMax(0);
   private final PWMSparkMax m_rightMotor0 = new PWMSparkMax(1);
   //private final PWMSparkMax m_motor;
+
+  private static final int IMG_WIDTH = 320;
+  private static final int IMG_HEIGHT = 240;
+
+  private VisionThread visionThread;
+  private double centerX = 0.0;
+  private DifferentialDrive drive;
+  private PWMSparkMax left;
+  private PWMSparkMax right;
+
+  private final Object imgLock = new Object();
   
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor0, m_rightMotor0);
   private final Joystick m_stick = new Joystick(0);
@@ -47,41 +63,18 @@ public class Robot extends TimedRobot {
     // gearbox is constructed, you might have to invert the left side instead.
     m_rightMotor0.setInverted(true);
 
-    m_visionThread = new Thread(() -> { //Camera stuff. copy paste from website. 
-              // Get the UsbCamera from CameraServer
-              UsbCamera camera = CameraServer.startAutomaticCapture();
-              // Set the resolution
-              camera.setResolution(640, 480);
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+    camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
 
-              // Get a CvSink. This will capture Mats from the camera
-              CvSink cvSink = CameraServer.getVideo();
-              // Setup a CvSource. This will send images back to the Dashboard
-              CvSource outputStream = CameraServer.putVideo("Rectangle", 640, 480);
-
-              // Mats are very memory expensive. Lets reuse this Mat.
-              Mat mat = new Mat();
-
-              // This cannot be 'true'. The program will never exit if it is. This
-              // lets the robot stop this thread when restarting robot code or
-              // deploying.
-              while (!Thread.interrupted()) {
-                // Tell the CvSink to grab a frame from the camera and put it
-                // in the source mat.  If there is an error notify the output.
-                if (cvSink.grabFrame(mat) == 0) {
-                  // Send the output the error.
-                  outputStream.notifyError(cvSink.getError());
-                  // skip the rest of the current iteration
-                  continue;
-                }
-                // Put a rectangle on the image
-                Imgproc.rectangle(
-                    mat, new Point(100, 100), new Point(400, 400), new Scalar(255, 255, 255), 5);
-                // Give the output stream a new image to display
-                outputStream.putFrame(mat);
-              }
-            });
-    m_visionThread.setDaemon(true);
-    m_visionThread.start();
+    visionThread = new VisionThread(camera, new MyVisionPipeline(), pipeline -> {
+      if (!pipeline.findBlobsOutput().isEmpty()) {
+          Rect r = Imgproc.boundingRect(pipeline.findBlobsOutput().get(0));
+          synchronized (imgLock) {
+              centerX = r.x + (r.width / 2);
+          }
+      }
+  });
+    visionThread.start();
   }
 
   @Override

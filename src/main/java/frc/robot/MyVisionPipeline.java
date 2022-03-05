@@ -18,6 +18,8 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.*;
 import org.opencv.objdetect.*;
 
+import edu.wpi.first.vision.VisionPipeline;
+
 /**
 * MyVisionPipeline class.
 *
@@ -25,7 +27,7 @@ import org.opencv.objdetect.*;
 *
 * @author GRIP
 */
-public class MyVisionPipeline {
+public class MyVisionPipeline implements VisionPipeline{
 
 	//Outputs
 	private Mat cvResizeOutput = new Mat();
