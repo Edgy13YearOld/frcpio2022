@@ -7,25 +7,16 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.first.wpilibj.Timer;
+//import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 //import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.CvSink;
-import edu.wpi.first.cscore.CvSource;
 import edu.wpi.first.cscore.UsbCamera;
-import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-
-import edu.wpi.first.vision.VisionPipeline;
-import edu.wpi.first.vision.VisionRunner;
 import edu.wpi.first.vision.VisionThread;
-import org.opencv.core.Rect;
-import org.opencv.imgproc.Imgproc;
+
 
 
 /**
@@ -44,15 +35,13 @@ public class Robot extends TimedRobot{
   private VisionThread visionThread;
   private double centerX = 0.0;
   private DifferentialDrive drive;
-  private PWMSparkMax left;
-  private PWMSparkMax right;
 
   private final Object imgLock = new Object();
   
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor0, m_rightMotor0);
   private final Joystick m_stick = new Joystick(0);
 
-  private Timer elapsedTime = new Timer();
+  //private Timer elapsedTime = new Timer();
 
   Thread m_visionThread;
 
@@ -80,12 +69,13 @@ public class Robot extends TimedRobot{
 
   @Override
   public void autonomousInit(){
+    /*
       elapsedTime.reset();
       elapsedTime.start();
       /*while(elapsedTime.get() < 1){
         SmartDashboard.putString("DB/String 0", String.format("%.2f", elapsedTime.get()));
         m_robotDrive.arcadeDrive(0.5, 0);
-      }*/
+      }
 
       for(int i = 0; i < 3; i++){ //wiggly wiggly
         elapsedTime.reset();
@@ -101,8 +91,7 @@ public class Robot extends TimedRobot{
         }
       }
       m_robotDrive.arcadeDrive(0, 0);
-
-
+      */
 
       
   }
@@ -118,11 +107,14 @@ public class Robot extends TimedRobot{
 
   @Override
 public void autonomousPeriodic() {
-    double centerX;
+    double centerX = IMG_WIDTH / 2;
     synchronized (imgLock) {
         centerX = this.centerX;
     }
+    SmartDashboard.putString("DB/String 0", String.format("%.2f", centerX));
+    SmartDashboard.putString("DB/String 1", String.format("%d",IMG_WIDTH / 2));
     double turn = centerX - (IMG_WIDTH / 2);
-    drive.arcadeDrive(-0.6, turn * 0.005);
+    SmartDashboard.putString("DB/String 2", String.format("%.2f",turn));
+    m_robotDrive.arcadeDrive(0, turn * 0.000);
 }
 }
