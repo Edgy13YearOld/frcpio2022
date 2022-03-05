@@ -11,7 +11,9 @@ import java.util.HashMap;
 
 import org.opencv.core.*;
 import org.opencv.core.Core.*;
-import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Feature2D;
+import org.opencv.features2d.SimpleBlobDetector;
+//import org.opencv;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.*;
 import org.opencv.objdetect.*;
@@ -198,7 +200,7 @@ public class MyVisionPipeline {
 	 */
 	private void findBlobs(Mat input, double minArea, double[] circularity,
 		Boolean darkBlobs, MatOfKeyPoint blobList) {
-		FeatureDetector blobDet = FeatureDetector.create(FeatureDetector.SIMPLEBLOB);
+		SimpleBlobDetector blobDet = SimpleBlobDetector.create();
 		try {
 			File tempFile = File.createTempFile("config", ".xml");
 
