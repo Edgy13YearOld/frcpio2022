@@ -27,14 +27,13 @@ import edu.wpi.first.vision.VisionThread;
 public class Robot extends TimedRobot{
   private final PWMSparkMax m_leftMotor0 = new PWMSparkMax(0);
   private final PWMSparkMax m_rightMotor0 = new PWMSparkMax(1);
-  //private final PWMSparkMax m_motor;
+  private final PWMSparkMax m_intakeMotor = new PWMSparkMax(2);
 
   private static final int IMG_WIDTH = 320;
   private static final int IMG_HEIGHT = 240;
 
   private VisionThread visionThread;
   private double centerX = 0.0;
-  private DifferentialDrive drive;
 
   private final Object imgLock = new Object();
   
@@ -102,19 +101,25 @@ public class Robot extends TimedRobot{
     // That means that the Y axis drives forward
     // and backward, and the X turns left and right.
     m_robotDrive.arcadeDrive(-m_stick.getY(), -m_stick.getX());
-    
+    //Intake functions
+    if(m_stick.getRawButton(5)){
+      m_intakeMotor.set(0.6);
+    }else if(m_stick.getRawButton(3)){
+      m_intakeMotor.set(-0.4);
+    }else{
+      m_intakeMotor.set(0);
+    }
   }
 
   @Override
 public void autonomousPeriodic() {
-    double centerX = IMG_WIDTH / 2;
+    double centerX;
     synchronized (imgLock) {
         centerX = this.centerX;
     }
     SmartDashboard.putString("DB/String 0", String.format("%.2f", centerX));
-    SmartDashboard.putString("DB/String 1", String.format("%d",IMG_WIDTH / 2));
     double turn = centerX - (IMG_WIDTH / 2);
-    SmartDashboard.putString("DB/String 2", String.format("%.2f",turn));
+    SmartDashboard.putString("DB/String 1", String.format("%.2f",turn));
     m_robotDrive.arcadeDrive(0, turn * 0.000);
 }
 }
