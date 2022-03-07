@@ -7,15 +7,19 @@ package frc.robot;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-//import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.motorcontrol.PWMSparkMax;
 import edu.wpi.first.wpilibj.smartdashboard.*;
 //import com.revrobotics.CANSparkMax;
-
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import org.opencv.core.Point;
 import edu.wpi.first.vision.VisionThread;
+import edu.wpi.first.wpilibj.AnalogPotentiometer;
+import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 
 
@@ -40,9 +44,16 @@ public class Robot extends TimedRobot{
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftMotor0, m_rightMotor0);
   private final Joystick m_stick = new Joystick(0);
 
-  //private Timer elapsedTime = new Timer();
+  private Timer elapsedTime = new Timer();
 
   Thread m_visionThread;
+
+
+//AnalogPotentiometer pot = new AnalogPotentiometer(0, 180, 30);
+
+DoubleSolenoid exampleDoublePCM = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 1, 2);
+
+
 
   @Override
   public void robotInit() {
@@ -110,6 +121,20 @@ public class Robot extends TimedRobot{
       m_intakeMotor.set(0);
     }
     SmartDashboard.putString("DB/String 0", String.format("%.2f", m_stick.getThrottle()*0.5+1));
+
+    if(m_stick.getRawButtonPressed(4)){
+      elapsedTime.reset();
+      elapsedTime.start();
+      exampleDoublePCM.set(DoubleSolenoid.Value.kForward);
+
+      if(elapsedTime.get() > 2){
+        exampleDoublePCM.set(DoubleSolenoid.Value.kReverse);
+      } 
+
+      if(elapsedTime.get() > 4){
+        exampleDoublePCM.set(DoubleSolenoid.Value.kOff);
+      }
+    }
   }
 
   @Override
