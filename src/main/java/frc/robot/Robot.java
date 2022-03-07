@@ -54,7 +54,7 @@ public class Robot extends TimedRobot{
     UsbCamera camera = CameraServer.startAutomaticCapture();
     camera.setResolution(IMG_WIDTH, IMG_HEIGHT);
 
-    visionThread = new VisionThread(camera, new MyVisionPipeline(), pipeline -> {
+    visionThread = new VisionThread(camera, new yCardPipeline(), pipeline -> {
       if (!pipeline.findBlobsOutput().toList().isEmpty()) {
         
           Point r = pipeline.findBlobsOutput().toList().get(0).pt;
@@ -109,6 +109,7 @@ public class Robot extends TimedRobot{
     }else{
       m_intakeMotor.set(0);
     }
+    SmartDashboard.putString("DB/String 0", String.format("%.2f", m_stick.getThrottle()*0.5+1));
   }
 
   @Override
@@ -118,8 +119,8 @@ public void autonomousPeriodic() {
         centerX = this.centerX;
     }
     SmartDashboard.putString("DB/String 0", String.format("%.2f", centerX));
-    double turn = centerX - (IMG_WIDTH / 2);
+    double turn = centerX - (IMG_WIDTH / 2 / 4);
     SmartDashboard.putString("DB/String 1", String.format("%.2f",turn));
-    m_robotDrive.arcadeDrive(0, turn * 0.000);
+    m_robotDrive.arcadeDrive(0, turn * 0.002 * (m_stick.getThrottle()*0.5+1));
 }
 }
