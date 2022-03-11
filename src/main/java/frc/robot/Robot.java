@@ -30,11 +30,16 @@ public class Robot extends TimedRobot{
   private final PWMSparkMax m_rightDriveMotors = new PWMSparkMax(2);
   private final PWMSparkMax m_intakeMotor = new PWMSparkMax(3);
   private final PWMSparkMax m_shooterMotor = new PWMSparkMax(4);
+  private final VictorSP m_conveyerMotor = new VictorSP(5);
   //Drivetrain
   private final DifferentialDrive m_robotDrive = new DifferentialDrive(m_leftDriveMotors, m_rightDriveMotors);
   //Pneumatics
   private final PneumaticsControlModule pCModule = new PneumaticsControlModule();//You wouldn't believe what this is
-  DoubleSolenoid intakePneumatic = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 6, 7);
+  DoubleSolenoid intakePneumatic = new DoubleSolenoid(PneumaticsModuleType.CTREPCM, 7, 6);
+  //Intake Management
+  private int intakeDown = 0;
+  //Timekeeping
+  //private Timer elapsedTime = new Timer();
   //Parameters for the camera
   //private final int IMG_WIDTH = 320;
   //private final int IMG_HEIGHT = 240;
@@ -43,8 +48,6 @@ public class Robot extends TimedRobot{
   //private double centerX = 0.0;
   //private final Object imgLock = new Object();
   //Thread m_visionThread;
-  //Timekeeping
-  //private Timer elapsedTime = new Timer();
 
   @Override
   public void robotInit() {
@@ -52,8 +55,9 @@ public class Robot extends TimedRobot{
     // result in both sides moving forward. Depending on how your robot's
     // gearbox is constructed, you might have to invert the left side instead.
     m_rightDriveMotors.setInverted(true);
-    //m_shooterMotor.setInverted(true);
-    pCModule.disableCompressor();
+    m_conveyerMotor.setInverted(true);
+    m_shooterMotor.setInverted(true);
+    //pCModule.disableCompressor();
     //Camera Init
     /*
       UsbCamera camera = CameraServer.startAutomaticCapture();
@@ -119,27 +123,32 @@ public class Robot extends TimedRobot{
     // and backward, and the X turns left and right.
     m_robotDrive.arcadeDrive(-m_stick.getY(), -m_stick.getX());
     //Intake functions
-    if(m_stick.getRawButton(5)){
-      m_intakeMotor.set(0.6);
-    }else if(m_stick.getRawButton(3)){
-      m_intakeMotor.set(-0.4);
+    if(m_stick.getRawButton(5)){//Button 5 rejects
+      m_intakeMotor.set(0.4* intakeDown);
+      m_conveyerMotor.set(0.4);
+    }else if(m_stick.getRawButton(3)){//Button 3 intakes
+      m_intakeMotor.set(-0.5 * intakeDown);
+      m_conveyerMotor.set(-0.8);
     }else{
       m_intakeMotor.set(0);
+      m_conveyerMotor.set(0);
     }
     //Shooter function
-    if(m_stick.getRawButton(1)){
-      m_shooterMotor.set(m_stick.getThrottle()*0.5+0.5);
+    if(m_stick.getRawButton(1)){//Trigger
+      m_shooterMotor.set(-m_stick.getThrottle()*0.5+0.5);
     }else{
       m_shooterMotor.set(0);
     }
-    SmartDashboard.putString("DB/String 0", String.format("SHOOTER THROTTLE %.2f", m_stick.getThrottle()*0.5+0.5));
+    SmartDashboard.putString("DB/String 0", String.format("SHOOTER THROTTLE %.2f", -m_stick.getThrottle()*0.5+0.5));
     //Solenoid Functions
     if(m_stick.getRawButton(4)){
       SmartDashboard.putString("DB/String 1", "INTAKE RETRACT");
       intakePneumatic.set(DoubleSolenoid.Value.kReverse);
+      intakeDown = 0;
     }else if(m_stick.getRawButton(6)){
-      SmartDashboard.putString("DB/String 1", "INTAKE FORWARD");
+      SmartDashboard.putString("DB/String 1", "INTAKE EXTEND");
       intakePneumatic.set(DoubleSolenoid.Value.kForward);
+      intakeDown = 1;
     }else{
       SmartDashboard.putString("DB/String 1", "INTAKE off");
       intakePneumatic.set(DoubleSolenoid.Value.kOff);
